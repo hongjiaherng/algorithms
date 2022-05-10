@@ -1,8 +1,9 @@
-from sorting import Sort
+from sort.sorting import Sort
+from string_match.matcher import Matcher
 
-sort = Sort(verbose=True)
+# sort = Sort(verbose=True)
 
-arr = [154, 56, 77, 134, 186, 56, 94, 24, 13, 83, 95, 143]
+# arr = [154, 56, 77, 134, 186, 56, 94, 24, 13, 83, 95, 143]
 # Bubble sort's driver code
 # arr = [5, 1, 12, -5, 16]
 # sort.bubble_sort(arr)
@@ -28,4 +29,14 @@ arr = [154, 56, 77, 134, 186, 56, 94, 24, 13, 83, 95, 143]
 
 # Shell sort's
 # arr = [154, 56, 77, 134, 186, 56, 94, 24]
-print(sort.shell_sort(arr))
+# print(sort.shell_sort(arr))
+
+match = Matcher(verbose=True)
+
+# Rabin-Karp Matcher
+# match.rabin_karp_matcher("3141592653589793", "26535", R=10, Q=997)
+# match.rabin_karp_matcher("3141592653589793", "26535", R=10, Q=7)
+# match.rabin_karp_matcher("algorisfunalgoisgreat", "algo", R=256, Q=1759)
+
+# Knuth-Morris-Pratt Matcher
+match.knuth_morris_pratt_matcher(text="onionionspl", pattern="onions")
