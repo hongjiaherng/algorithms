@@ -1,11 +1,7 @@
+from termcolor import colored
+from tabulate import tabulate
+
 class Matcher:
-    def __init__(self, verbose=False):
-        self.set_verbosity(verbose)
-
-    def set_verbosity(self, verbose=False):
-        self.__verbose = verbose
-        self.__verboseprint = print if self.__verbose else lambda *a, **k:None
-
 
     def naive_string_matcher(self, text, pattern):
         """
@@ -104,43 +100,28 @@ class Matcher:
         n = len(text)
         m = len(pattern)
 
-        # Define modular hash function, i.e., (prev_hash * R + text[i]) % Q = new_hash, repeat
-        def hash(key):
-            key_hash = 0
-            for i in range(m):
-                prev_key_hash = key_hash
-                key_hash = (key_hash * R + numeric(key[i])) % Q
-                
-                if self.__verbose and i == 0:
-                    self.__verboseprint("hashing : (hash * R + text[i]) % Q = hash")
-                self.__verboseprint(f"{' ' * 10}{key[0:i + 1]} % {Q} = ({prev_key_hash} * {R} + {numeric(key[i])}) % {Q} = {key_hash}")
-            return key_hash
+        # Use modular hash function, i.e., (prev_hash * R + text[i]) % Q = new_hash, repeat
+        # Hash the pattern and the first m characters of text
+        pattern_hash = 0
+        subtext_hash = 0
 
-        # Hash the pattern
-        self.__verboseprint(f"pattern : {pattern}")
-        pattern_hash = hash(pattern)
-
-        # Hash the first m characters of text
-        self.__verboseprint(f"\ntext    : {text}")
-        subtext_hash = hash(text[0:m])
+        for i in range(m):
+            pattern_hash = (pattern_hash * R + numeric(pattern[i])) % Q
+            subtext_hash = (subtext_hash * R + numeric(text[i])) % Q
 
         # Slide the window from shift 0 to shift n-m (last window of the text)
         for shift in range(n - m + 1):
             # Compare if the current subtext hash is equals to the pattern hash
             if pattern_hash == subtext_hash:
                 if pattern == text[shift:shift + m]: # Compare the pattern and subtext character-wisely, O(m)
-                    self.__verboseprint(f"MATCH   : => Pattern found at index {shift} to {shift + m}")
+                    print(f"MATCH   : => Pattern found at index {shift} to {shift + m}")
                 else:
-                    self.__verboseprint(f"warning : Spurious hit occurs: pattern = {pattern}, subtext = {text[shift:shift + m]}, hash_collided = {pattern_hash}")
+                    print(f"warning : Spurious hit occurs: pattern = {pattern}, subtext = {text[shift:shift + m]}, hash_collided = {pattern_hash}")
         
             # Perform rolling hashing, i.e., (R * (prev_hash - text[shift] * (R^(m - 1))) + text[shift + m]) % Q = new_hash, repeat
             if shift < n - m:
-                prev_subtext_hash = subtext_hash
                 subtext_hash = (R * (subtext_hash - numeric(text[shift]) * (R**(m - 1))) + numeric(text[shift + m])) % Q
-                if self.__verbose and shift == 0:
-                    self.__verboseprint("note    : start rolling hash : (R * (hash - text[shift] * (R^(m - 1))) + text[shift + m]) % Q = hash")
-                self.__verboseprint(f"{' ' * (10 + shift)} {text[shift + 1:shift + m + 1]} % {Q} = ({R} * ({prev_subtext_hash} - {numeric(text[shift])} * ({R}^{m - 1})) + {numeric(text[shift + m])}) % {Q} = {subtext_hash}")
-        self.__verboseprint("note    : end rolling hash")
+                
 
 
     def knuth_morris_pratt_matcher(self, text, pattern):
@@ -158,29 +139,40 @@ class Matcher:
             lps = [None for _ in range(m)]
             lps[0] = 0
 
-            length = 0 # Length of the longest prefix that's also a suffix in a substring
+            length = 0  # Length of the longest prefix that's also a suffix in a substring
             for i in range(1, m):
                 while length > 0 and pattern[length] != pattern[i]:
                     length = lps[length - 1]
                 if pattern[length] == pattern[i]:
                     length += 1
                 lps[i] = length
-            
             return lps
 
-        # Create longest prefix-suffix table
-        lps = compute_prefix_function(pattern, m)
+        # build pi / longest prefix-suffix table which tells at a particular substring of pattern, 
+        # what's the length of longest prefix of the substring that's also a suffix 
+        lps = compute_prefix_function(pattern, m)                   
 
         # Find pattern
-        q = 0
-        for i in range(n):
-            while q > 0 and pattern[q] != text[i]:
-                q = lps[q - 1]
-            if pattern[q] == text[i]:
-                q += 1
-            if q == m:
-                print(f"Pattern occurs with shift {i - m + 1}")
-                q = lps[q - 1]
+        j = 0                                                       # number of characters matched, pointer for pattern
+        for i in range(n):                                          # i: pointer for text
+            while j > 0 and pattern[j] != text[i]:
+                j = lps[j - 1]
+
+            if pattern[j] == text[i]:
+                j += 1
+                
+            if j == m:
+                print(f"Pattern occurs with shift {i - m + 1}\n")
+                j = lps[j - 1]
+            
+
+
+    
+
+    
+
+
+            
 
 
     

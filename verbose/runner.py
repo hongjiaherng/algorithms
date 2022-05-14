@@ -1,5 +1,6 @@
-from sort.sorting import Sort
-from string_match.matcher import Matcher
+import imp
+from matcher import Matcher
+from sorting import Sort
 
 # sort = Sort(verbose=True)
 
@@ -39,4 +40,9 @@ match = Matcher(verbose=True)
 # match.rabin_karp_matcher("algorisfunalgoisgreat", "algo", R=256, Q=1759)
 
 # Knuth-Morris-Pratt Matcher
-match.knuth_morris_pratt_matcher(text="onionionspl", pattern="onions")
+# match.knuth_morris_pratt_matcher(text="onionionspl", pattern="onions")
+match.knuth_morris_pratt_matcher(text="ABC ABCDAB ABCDABCDABDE", pattern="ABCDABD")
+
+# from termcolor import colored
+
+# print(colored('hello', 'blue', attrs=['bold']))
